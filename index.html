@@ -287,7 +287,7 @@ a { color: inherit; text-decoration: none; }
 
 <div class="app" id="app">
   <div id="stage"></div>
-  <button class="music-btn" id="musicBtn" type="button" aria-pressed="true" aria-label="關閉音樂">
+  <button class="music-btn" id="musicBtn" type="button" aria-pressed="true" aria-label="關閉音樂與音效">
     <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9h4l5-4v14l-5-4H3z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7"/><path d="M18.8 5.8a9 9 0 0 1 0 12.4"/></svg>
     <svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9h4l5-4v14l-5-4H3z" fill="currentColor"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg>
   </button>
@@ -521,6 +521,7 @@ a { color: inherit; text-decoration: none; }
       </div>
     `, { scroll: true, cls: "split result" });
     setHash(code.toLowerCase());
+    setTimeout(() => sound.reveal(), 60);
     if (friend) el.querySelector("#tryBtn").onclick = cover;
     else {
       el.querySelector("#shareBtn").onclick = () => shareMenu(code);
@@ -690,53 +691,92 @@ a { color: inherit; text-decoration: none; }
   preload(["img/type/title.webp", "img/cover.webp", "img/paper.webp"]);
   setTimeout(() => preload(["img/type/howto.webp", "img/scenes/01.webp", "img/scenes/02.webp", "img/type/d0.webp", "img/type/d1.webp", "img/type/d2.webp", "img/type/matching.webp"]), 600);
 
-  // ---------- 配樂 ----------
-  (() => {
+  // ---------- 配樂與音效（右上角一顆開關一起管） ----------
+  const sound = (() => {
     const btn = document.getElementById("musicBtn");
     const VOL = 0.32;
-    let ctx = null, gain = null, src = null, want = true, started = false;
+    let ctx = null, musicGain = null, sfxGain = null, src = null, want = true, started = false;
     try { want = localStorage.getItem("cat-mbti-music") !== "off"; } catch (e) {}
-    let raw = null;
-    const fetchRaw = () => raw || (raw = fetch("audio/bgm.m4a").then(r => r.arrayBuffer()));
-    setTimeout(fetchRaw, 1200);
-    let decoded = null;
+    const raws = {};
+    const fetchRaw = url => raws[url] || (raws[url] = fetch(url).then(r => r.arrayBuffer()));
+    setTimeout(() => { fetchRaw("audio/bgm.m4a"); fetchRaw("audio/reveal.mp3"); }, 1200);
+    const decoded = {};
+    const decode = url => decoded[url] || (decoded[url] = fetchRaw(url).then(b => new Promise((res, rej) => ctx.decodeAudioData(b.slice(0), res, rej))));
     function unlock() {
       if (!ctx) {
         const AC = window.AudioContext || window.webkitAudioContext;
         if (!AC) return false;
-        ctx = new AC(); gain = ctx.createGain(); gain.gain.value = 0; gain.connect(ctx.destination);
+        ctx = new AC();
+        musicGain = ctx.createGain(); musicGain.gain.value = 0; musicGain.connect(ctx.destination);
+        sfxGain = ctx.createGain(); sfxGain.gain.value = 1; sfxGain.connect(ctx.destination);
+        decode("audio/reveal.mp3").catch(() => {});
       }
       if (ctx.state === "suspended") ctx.resume();
       return true;
     }
     function ramp(to, sec) {
       const t = ctx.currentTime;
-      gain.gain.cancelScheduledValues(t); gain.gain.setValueAtTime(gain.gain.value, t); gain.gain.linearRampToValueAtTime(to, t + sec);
+      musicGain.gain.cancelScheduledValues(t); musicGain.gain.setValueAtTime(musicGain.gain.value, t); musicGain.gain.linearRampToValueAtTime(to, t + sec);
     }
     async function play() {
       if (!unlock()) return;
       started = true;
       try {
-        if (!decoded) decoded = fetchRaw().then(b => new Promise((res, rej) => ctx.decodeAudioData(b.slice(0), res, rej)));
-        const buffer = await decoded;
+        const buffer = await decode("audio/bgm.m4a");
         if (!want) return;
-        if (!src) { src = ctx.createBufferSource(); src.buffer = buffer; src.loop = true; src.connect(gain); src.start(); }
+        if (!src) { src = ctx.createBufferSource(); src.buffer = buffer; src.loop = true; src.connect(musicGain); src.start(); }
         ramp(VOL, 1.2);
       } catch (e) { started = false; }
     }
-    function stop() { if (ctx && gain) ramp(0, 0.4); }
-    function render() { btn.setAttribute("aria-pressed", String(want)); btn.setAttribute("aria-label", want ? "關閉音樂" : "開啟音樂"); }
+    function stop() { if (ctx && musicGain) ramp(0, 0.4); }
+    // 木質「啪」：三角波快速下滑＋一小段帶通雜訊當敲擊感
+    function click(pitch = 1) {
+      if (!want || !unlock()) return;
+      const t = ctx.currentTime;
+      const o = ctx.createOscillator(); o.type = "triangle";
+      o.frequency.setValueAtTime(1180 * pitch, t); o.frequency.exponentialRampToValueAtTime(720 * pitch, t + 0.05);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.3, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+      o.connect(g); g.connect(sfxGain); o.start(t); o.stop(t + 0.1);
+      const len = Math.round(ctx.sampleRate * 0.02), nb = ctx.createBuffer(1, len, ctx.sampleRate), d = nb.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+      const n = ctx.createBufferSource(); n.buffer = nb;
+      const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 2600 * pitch; bp.Q.value = 3;
+      const ng = ctx.createGain(); ng.gain.value = 0.22;
+      n.connect(bp); bp.connect(ng); ng.connect(sfxGain); n.start(t);
+    }
+    async function reveal() {
+      if (!want || !unlock()) return;
+      try {
+        const buffer = await decode("audio/reveal.mp3");
+        const s = ctx.createBufferSource(); s.buffer = buffer;
+        const g = ctx.createGain(); g.gain.value = 0.7;
+        s.connect(g); g.connect(sfxGain); s.start();
+      } catch (e) {}
+    }
+    function render() { btn.setAttribute("aria-pressed", String(want)); btn.setAttribute("aria-label", want ? "關閉音樂與音效" : "開啟音樂與音效"); }
     btn.addEventListener("click", e => {
       e.stopPropagation();
       want = !want;
       try { localStorage.setItem("cat-mbti-music", want ? "on" : "off"); } catch (er) {}
       render();
-      if (want) play(); else stop();
+      if (want) { play(); click(1.1); } else stop();
     });
-    // 瀏覽器規定要先有互動才能出聲：第一次點畫面時開始播放
-    document.addEventListener("pointerdown", e => { if (want && !started && e.target !== btn && !btn.contains(e.target)) play(); }, true);
+    // 瀏覽器規定要先有互動才能出聲：每次點畫面都順便解鎖，第一次點時開始播配樂
+    document.addEventListener("pointerdown", e => {
+      if (btn.contains(e.target)) return;
+      if (want) { unlock(); if (!started) play(); }
+    }, true);
+    // 所有按鈕、選項、分享項目按下時的「啪」
+    document.addEventListener("click", e => {
+      const el = e.target.closest("button, a.share-item");
+      if (!el || el === btn) return;
+      const ans = el.dataset && el.dataset.ans;
+      click(ans === "B" ? 1.22 : ans === "A" ? 1.0 : 1.1);
+    }, true);
     document.addEventListener("visibilitychange", () => { if (!ctx) return; if (document.hidden) ctx.suspend(); else if (want) ctx.resume(); });
     render();
+    return { click, reveal };
   })();
 
   const start = () => { const h = (location.hash || "").slice(1).toUpperCase(); if (R[h]) result(h, null, true); else cover(); };
