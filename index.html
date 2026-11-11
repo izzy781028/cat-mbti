@@ -207,13 +207,17 @@ a { color: inherit; text-decoration: none; }
 .handle { align-self: center; width: 44px; height: 5px; border-radius: 3px; background: rgba(90, 98, 120, .35); }
 .sheet h3 { margin: 0; text-align: center; font-weight: 900; font-size: 24px; }
 .sheet p.note { margin: 0; text-align: center; font-size: 16px; color: var(--slate); line-height: 1.5; }
-.share-row { display: flex; justify-content: center; gap: 26px; flex-wrap: wrap; }
-.share-item { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; min-width: 64px; }
+.share-row { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+@media (min-width: 420px) { .share-row { gap: 26px; } }
+.share-item { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; min-width: 70px; white-space: nowrap; }
 .share-item .ic { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; color: #FFF; font-weight: 900; font-size: 15px; letter-spacing: .04em; }
 .ic.line { background: #06C755; }
 .ic.fb { background: #1877F2; font-size: 26px; }
 .ic.ig { background: #E1306C; }
 .ic.save, .ic.copy { background: var(--teal); font-size: 20px; }
+.ic.msg { background: linear-gradient(135deg, #0099FF 0%, #A033FF 62%, #FF5280 100%); }
+.ic.msg svg { width: 32px; height: 32px; }
+.ic.more { background: var(--navy); font-size: 26px; line-height: 1; padding-bottom: 8px; }
 .ig-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .ig-opt { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 10px; border: 2px solid var(--navy); border-radius: 20px; background: var(--blush); font-weight: 900; font-size: 19px; }
 .ig-opt small { font-weight: 700; font-size: 14px; color: var(--slate); }
@@ -540,19 +544,38 @@ a { color: inherit; text-decoration: none; }
       <div class="share-row">
         <a class="share-item" href="https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}" target="_blank" rel="noopener"><span class="ic line">LINE</span>LINE</a>
         <a class="share-item" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}" target="_blank" rel="noopener"><span class="ic fb">f</span>Facebook</a>
+        <button class="share-item" id="msgBtn"><span class="ic msg"><svg viewBox="0 0 32 32" aria-hidden="true"><path fill="#FFF" d="M16 4C9.2 4 4 9 4 15.4c0 3.4 1.4 6.3 3.8 8.3v4.1l3.6-2c1.4.4 3 .6 4.6.6 6.8 0 12-5 12-11S22.8 4 16 4z"/><path fill="#7A3CFF" d="M8.6 19.2l3.9-6.2 3.1 2.4 4.4-2.5-3.9 6.2-3.1-2.4z"/></svg></span>Messenger</button>
         <button class="share-item" id="igBtn"><span class="ic ig">IG</span>Instagram</button>
       </div>
       <div class="share-row">
         <button class="share-item" id="saveBtn"><span class="ic save">↓</span>存分享圖</button>
         <button class="share-item" id="copyBtn"><span class="ic copy">⧉</span>複製連結</button>
+        ${canNativeShare ? `<button class="share-item" id="moreBtn"><span class="ic more">⋯</span>更多</button>` : ""}
       </div>
       <button class="btn btn-secondary" id="cancelBtn">取消</button>
     `, s => {
+      s.querySelector("#msgBtn").onclick = () => shareMessenger(url);
+      const more = s.querySelector("#moreBtn");
+      if (more) more.onclick = () => navigator.share({ title: "你是哪一種貓？MBTI 貓咪人格測驗", text, url }).catch(() => {});
       s.querySelector("#igBtn").onclick = () => igMenu(code);
       s.querySelector("#saveBtn").onclick = () => preview(code, "story", "存分享圖");
       s.querySelector("#copyBtn").onclick = () => copy(url);
       s.querySelector("#cancelBtn").onclick = () => closeSheet();
     });
+  }
+
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const canNativeShare = isMobile && typeof navigator.share === "function";
+  async function shareMessenger(url) {
+    if (isMobile) {
+      // 手機：直接打開 Messenger App 的分享畫面；沒裝 App 時改成複製連結
+      location.href = `fb-messenger://share/?link=${encodeURIComponent(url)}`;
+      setTimeout(() => { if (!document.hidden) copy(url).then(() => flash("沒有開啟 Messenger，已複製連結，貼到聊天室就好")); }, 1400);
+      return;
+    }
+    await copy(url, null, true);
+    flash("已複製連結，到 Messenger 貼上傳給朋友");
+    const a = document.createElement("a"); a.href = "https://www.messenger.com/"; a.target = "_blank"; a.rel = "noopener"; document.body.appendChild(a); a.click(); a.remove();
   }
 
   function igMenu(code) {
@@ -592,8 +615,8 @@ a { color: inherit; text-decoration: none; }
     });
   }
 
-  async function copy(text, input) {
-    try { await navigator.clipboard.writeText(text); flash("已複製連結"); }
+  async function copy(text, input, quiet) {
+    try { await navigator.clipboard.writeText(text); if (!quiet) flash("已複製連結"); }
     catch (e) {
       if (input) { input.focus(); input.select(); flash("已選取連結，請手動複製"); }
       else flash("無法自動複製：" + text);
