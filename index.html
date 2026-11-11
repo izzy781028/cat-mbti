@@ -193,6 +193,30 @@ a { color: inherit; text-decoration: none; }
 .res-btns { margin-top: 18px; }
 .friend-chip { align-self: flex-start; background: var(--cream); border: 1.5px solid var(--navy); border-radius: 999px; padding: 4px 12px; font-weight: 700; font-size: 14px; margin-bottom: 6px; }
 
+/* ---------- 更認識這隻貓 ---------- */
+.more-cue { align-self: center; display: flex; flex-direction: column; align-items: center; margin-top: 18px; font-size: 15px; font-weight: 700; color: var(--slate); }
+.more-cue span { font-size: 20px; line-height: 1; animation: nudge 1.6s ease-in-out infinite; }
+@keyframes nudge { 50% { transform: translateY(5px); } }
+.more { flex: none; display: flex; flex-direction: column; margin-top: 40px; }
+.more-title { margin: 0 0 16px; font-weight: 900; font-size: 30px; line-height: 1.2; }
+.more-title span { display: block; font-size: 18px; color: var(--slate); }
+.more-grid { display: grid; gap: 14px; }
+.mcard { background: var(--cream); border: 2px solid var(--navy); border-radius: 20px; padding: 16px 18px 18px; }
+.mcard.tint { background: var(--blush); }
+.mcard h3 { display: inline-block; margin: 0 0 10px; padding: 0 2px; font-size: 19px; font-weight: 900; background: linear-gradient(transparent 58%, var(--mustard) 58%); }
+.mcard p { margin: 0; font-size: 17px; line-height: 1.7; }
+.mcard ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; font-size: 17px; line-height: 1.5; counter-reset: tip; }
+.mcard li { position: relative; padding-left: 32px; counter-increment: tip; }
+.mcard li::before { position: absolute; left: 0; top: 1px; width: 23px; height: 23px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 900; line-height: 1; color: var(--cream); }
+.mcard .ok li::before { content: "✓"; background: var(--teal); }
+.mcard .warn li::before { content: "!"; background: var(--orange); }
+.mcard .tips li::before { content: counter(tip); background: var(--navy); }
+.mate-card { display: flex; align-items: center; gap: 16px; }
+.mate-card .photo { flex: none; width: 84px; aspect-ratio: 3 / 4; padding: 5px; border-radius: 16px; transform: rotate(-3deg); }
+.mate-card .photo img { border-radius: 12px; }
+.mate-card .mate-name { font-weight: 900; font-size: 18px; margin-bottom: 6px; }
+.more-btns { margin-top: 22px; }
+
 /* ---------- 面板 ---------- */
 .scrim { position: absolute; inset: 0; background: var(--ink-scrim); opacity: 0; transition: opacity .2s; z-index: 20; }
 .scrim.show { opacity: 1; }
@@ -280,6 +304,17 @@ a { color: inherit; text-decoration: none; }
   .result .res-mid .pre { font-size: 30px; }
   .result .label { margin-top: 0; font-size: 28px; }
   .result .quote { font-size: 28px; }
+
+  .screen.split.result { grid-template-rows: 0 minmax(calc(100cqh - 74px), auto) auto; }
+  .result .more { grid-column: 1 / -1; grid-row: 3; margin-top: 56px; }
+  .result .more-title { font-size: 40px; }
+  .result .more-title span { font-size: 22px; }
+  .result .more-grid { grid-template-columns: 1fr 1fr; gap: 18px; }
+  .result .mcard { padding: 22px 26px 24px; }
+  .result .mcard.wide { grid-column: 1 / -1; }
+  .result .mate-card .photo { width: 120px; }
+  .result .more-btns { flex-direction: row; justify-content: center; }
+  .result .more-btns .btn { flex: 1; }
   /* 面板改為置中對話框 */
   .sheet { left: 50%; right: auto; bottom: 28px; width: 480px; border-radius: 28px; transform: translate(-50%, calc(100% + 40px)); padding-bottom: 26px; }
   .sheet.show { transform: translate(-50%, 0); }
@@ -345,6 +380,366 @@ a { color: inherit; text-decoration: none; }
     ESTP: ["企業家", "滑板豹貓", "先做再說，想太多會老。", ["大膽", "行動", "刺激"], "ISFJ"],
     ESFP: ["表演者", "舞台金毛貓", "舞台燈呢？我準備好了！", ["熱鬧", "表演", "享受當下"], "ISTJ"],
   };
+  // 每個類型的延伸介紹：個性、強項、盲點、朋友與感情、工作與讀書、相處訣竅、拍檔理由
+  const D = {
+    "INTJ": {
+      "about": "表面上安靜地趴在窗邊，其實腦袋裡正在下一盤很大的棋。你習慣先看清全局、想好三步之後的路，再一次到位地出手。比起熱鬧，你更享受把複雜問題拆開、找出最佳解的那一刻。你對自己要求很高，對別人也是；但只要被你認可，就是很長久的信任。",
+      "strengths": [
+        "看得遠，擅長長期規劃",
+        "獨立作業，不需要人盯",
+        "遇到混亂也能冷靜分析"
+      ],
+      "blind": [
+        "覺得別人「怎麼還沒想到」而不耐煩",
+        "太相信自己的計畫，不容易改",
+        "情緒都放心裡，常被說難親近"
+      ],
+      "love": "朋友不多但都很精。比起天天聊天，你更在乎能不能聊到有深度的東西。喜歡一個人時，會默默用行動把兩人的未來規劃好。",
+      "work": "適合需要策略與系統思考的角色，像是規劃、研究、工程、產品。最怕沒效率的會議和沒有邏輯的指令。",
+      "tips": [
+        "有話直說，牠喜歡聽重點",
+        "尊重牠的獨處時間",
+        "提出想法時附上理由，牠會認真聽"
+      ],
+      "mate": "氣球橘虎斑的熱情和天馬行空，幫你打開計畫以外的可能；你則幫牠把點子真的落地。"
+    },
+    "INTP": {
+      "about": "你是那隻會盯著水龍頭滴水看半小時的貓。不是在發呆，是在研究原理。你的好奇心停不下來，喜歡拆解事情、追問「為什麼」，腦中常同時開著十個分頁。你對真理很執著、對規則很隨性，只要題目夠有趣，可以廢寢忘食。",
+      "strengths": [
+        "好奇心旺盛，學新東西很快",
+        "邏輯清楚，擅長抓出漏洞",
+        "想法原創，常有意想不到的解法"
+      ],
+      "blind": [
+        "想得多做得少，計畫常停在腦中",
+        "生活小事常忘東忘西",
+        "討論時太在意對錯，忘了顧感受"
+      ],
+      "love": "朋友圈小而有趣，最愛跟能一起胡思亂想的人聊到半夜。表達感情不太直接，但會把你說過的小事默默記住。",
+      "work": "適合研究、程式、分析、設計這類需要深度思考的工作。給牠自由和難題，牠會還你驚喜；硬塞流程，牠就放空。",
+      "tips": [
+        "丟一個有趣的問題，牠就打開話匣子",
+        "別催，牠正在想",
+        "幫忙提醒牠吃飯和截止日"
+      ],
+      "mate": "西裝賓士貓的執行力，能把你的天才想法推到終點；你則幫牠看見更多沒想過的角度。"
+    },
+    "ENTJ": {
+      "about": "天生的隊長。一進到群組，你就會自然地開始分工、定目標、排時程。你相信效率，也相信「做不到」通常只是還沒找到方法。說話直接、做事果斷，願意扛責任，也期待身邊的人跟上你的節奏。",
+      "strengths": [
+        "決策快，關鍵時刻扛得住",
+        "很會整合人和資源",
+        "目標明確，執行力超強"
+      ],
+      "blind": [
+        "太急，容易忽略別人的步調",
+        "講話太直，聽起來像在下命令",
+        "不太會停下來休息"
+      ],
+      "love": "對朋友很講義氣，誰有困難你會直接幫忙想辦法。感情裡你是主動的那個，但要記得，對方有時需要的是陪伴，不是解決方案。",
+      "work": "適合管理、創業、專案統籌、業務等需要帶頭和做決定的位置。最受不了拖拖拉拉和沒人負責。",
+      "tips": [
+        "先講結論，細節後補",
+        "不同意就直說，牠尊重有想法的人",
+        "提醒牠：休息也是效率的一部分"
+      ],
+      "mate": "實驗室灰虎斑想得深、看得廣，幫你補上沒想到的盲點；你則幫牠把想法變成真的成果。"
+    },
+    "ENTP": {
+      "about": "你是那隻故意把杯子推到桌邊、想看大家什麼反應的貓。腦筋轉得快、點子一個接一個，最愛挑戰「本來就是這樣」的事。跟你聊天永遠不無聊，因為你總能從奇怪的角度切入。對你來說，辯論不是吵架，是一種玩。",
+      "strengths": [
+        "反應快，臨場應變一流",
+        "點子多，很會發想新玩法",
+        "不怕權威，敢提不同意見"
+      ],
+      "blind": [
+        "開了很多頭，常常沒收尾",
+        "為了好玩而抬槓，有時讓人受傷",
+        "討厭重複的例行公事"
+      ],
+      "love": "朋友很多元，你喜歡能跟你鬥嘴又不會真的生氣的人。感情裡需要新鮮感，一起嘗試新事物就是你們的保鮮劑。",
+      "work": "適合創意、行銷、顧問、新創等需要發想和說服的工作。給牠舞台和自由；重複的行政工作會讓牠枯萎。",
+      "tips": [
+        "牠跟你抬槓，不代表不喜歡你",
+        "一起腦力激盪，牠最開心",
+        "幫牠訂個截止日，點子才會落地"
+      ],
+      "mate": "占星暹羅貓的深度和洞察，接得住你的天馬行空，也讓你看見人心那一面；你則讓牠的世界更好玩。"
+    },
+    "INFJ": {
+      "about": "你總能比別人更早察覺空氣中的變化：誰今天不太開心、哪段關係快出問題，你都「早就感覺到了」。安靜、溫柔，心裡卻有很強的理想和原則。你想讓世界變好一點，也願意為在乎的人付出很多，只是很少有人真正看懂你。",
+      "strengths": [
+        "洞察力強，很懂人心",
+        "有理想，做事有使命感",
+        "溫柔又堅定，是很好的傾聽者"
+      ],
+      "blind": [
+        "太在意別人，常把自己累壞",
+        "追求完美，對自己很嚴格",
+        "受傷時會突然關上門、消失一陣子"
+      ],
+      "love": "朋友不用多，但要真心。你重視深度連結，喜歡一對一的長談。感情裡很專一，需要對方真正理解你。",
+      "work": "適合諮商、教育、寫作、設計，或任何能幫助別人的工作。做的事情要有意義，牠才會全力以赴。",
+      "tips": [
+        "認真聽牠說，別急著給建議",
+        "給牠充電的獨處時間",
+        "把感謝說出口，牠會記很久"
+      ],
+      "mate": "魔術師橘白貓會把你從想太多裡拉出來，帶你去玩；你的洞察也讓牠的點子更有溫度。"
+    },
+    "INFP": {
+      "about": "你心裡有一座很大的花園，種滿了想像、故事和感受。外表安靜甚至有點迷糊，內心其實非常豐富。你重視真誠、討厭虛偽，總是站在弱小的那一邊。你需要很多發呆的時間，因為那就是你的靈感來源。",
+      "strengths": [
+        "同理心強，能理解各種人",
+        "想像力豐富，很有創作天份",
+        "真誠，忠於自己的價值"
+      ],
+      "blind": [
+        "容易想太多，陷在情緒裡",
+        "不喜歡衝突，常把委屈吞下去",
+        "會拖延，等靈感來了才動"
+      ],
+      "love": "朋友會覺得你很溫暖、很好聊。你對感情很浪漫，記得每個小細節，也需要對方溫柔對待你的玻璃心。",
+      "work": "適合寫作、插畫、設計、助人，或任何能表達自我的工作。給牠意義和空間，牠能做出打動人心的東西。",
+      "tips": [
+        "別笑牠想太多，那是牠的超能力",
+        "溫柔地說，牠才聽得進去",
+        "鼓勵牠把作品分享出來"
+      ],
+      "mate": "班導三花貓會溫暖地為你加油，陪你把夢想一步步走出來；你則提醒牠也要照顧自己的心。"
+    },
+    "ENFJ": {
+      "about": "你是班上那隻會記得每個人生日、看到誰落單就過去搭話的貓。你天生擅長鼓舞人心，看得見每個人的潛力，也真心希望大家變得更好。你說話很有感染力，只是太常把別人放在前面，偶爾忘了自己也需要被照顧。",
+      "strengths": [
+        "很會鼓勵人，帶起團隊士氣",
+        "溝通力強，能凝聚大家",
+        "熱心助人，責任感重"
+      ],
+      "blind": [
+        "太在意別人的期待",
+        "很難拒絕，容易攬太多事",
+        "有時「為你好」到讓人有壓力"
+      ],
+      "love": "你是朋友群的核心，總在辦活動、關心大家。感情裡全心付出，也希望對方同樣投入，多說說心裡話。",
+      "work": "適合教育、人資、公關、社群經營、管理等跟人有關的工作。最擅長的是帶人成長。",
+      "tips": [
+        "也問問牠：「那你還好嗎？」",
+        "對牠的付出說聲謝謝",
+        "提醒牠：可以說不"
+      ],
+      "mate": "詩人白貓的真誠與溫柔，讓你可以放下班導身份做自己；你則給牠勇氣，把心裡話說出來。"
+    },
+    "ENFP": {
+      "about": "你是一顆隨時會飄起來的氣球：熱情、好奇、對世界充滿興趣。新點子、新朋友、新冒險都會讓你眼睛發亮。你很會帶動氣氛，也很能感受別人的情緒，總讓身邊的人覺得被看見。只是熱情來得快，有時也去得快。",
+      "strengths": [
+        "熱情有感染力，走到哪都受歡迎",
+        "創意滿滿，想法很跳躍",
+        "很能同理人，讓人覺得溫暖"
+      ],
+      "blind": [
+        "三分鐘熱度，容易半途而廢",
+        "不喜歡規則和細節",
+        "情緒起伏大，一下嗨一下低落"
+      ],
+      "love": "朋友遍天下，跟誰都聊得來。感情裡浪漫又充滿驚喜，需要的是能陪你冒險、也接得住你低潮的人。",
+      "work": "適合創意、行銷、活動、教育、媒體等能發揮點子和人際力的工作。日復一日的重複工作會讓牠洩氣。",
+      "tips": [
+        "跟牠一起興奮，牠會更愛你",
+        "溫柔提醒牠把事情做完",
+        "牠低落時，陪著就好"
+      ],
+      "mate": "西洋棋藍貓的冷靜與計畫，幫你把滿天飛的點子綁上線；你則帶牠看見計畫以外的有趣世界。"
+    },
+    "ISTJ": {
+      "about": "你的貓生寫在行事曆上：幾點吃飯、幾點巡邏、幾點睡覺，一清二楚。你可靠、守信、說到做到，是大家最放心交付事情的人。你相信規則存在一定有原因，做事一步一步來，不浮誇也不偷懶。你的溫柔，藏在每一件準時完成的事裡。",
+      "strengths": [
+        "超級可靠，說到做到",
+        "細心，很少出錯",
+        "有條理，擅長把事情管好"
+      ],
+      "blind": [
+        "不太喜歡突然的改變",
+        "有時太堅持「應該怎麼做」",
+        "不擅長表達情感"
+      ],
+      "love": "朋友不一定多，但你是最穩的那一個。感情裡你用行動表達愛：記得紀念日、準時接送、把對方排進行程裡。",
+      "work": "適合行政、會計、法務、工程、品管等需要精準和責任感的工作。給牠清楚的規則，牠會做到最好。",
+      "tips": [
+        "改計畫請提早說",
+        "守時就是對牠最大的尊重",
+        "謝謝牠一直以來的可靠"
+      ],
+      "mate": "舞台金毛貓帶你偶爾跳出行事曆、享受當下；你則是牠最安心的後盾。"
+    },
+    "ISFJ": {
+      "about": "你是那隻會在大家回家時，默默準備好一碗熱湯的貓。你細心、體貼，總記得誰怕冷、誰不吃香菜。你不愛出風頭，卻是大家生活裡最溫暖的存在。你珍惜回憶和傳統，也會用盡全力守護在乎的人。",
+      "strengths": [
+        "超細心，很會照顧人",
+        "忠誠可靠，默默付出",
+        "記性好，記得大家的小習慣"
+      ],
+      "blind": [
+        "不太會拒絕，常把自己累壞",
+        "委屈都往心裡放",
+        "面對改變會有點不安"
+      ],
+      "love": "你是朋友心中的「家」，有事第一個想到你。感情裡溫柔體貼，也需要對方主動關心你、看見你的付出。",
+      "work": "適合醫護、教育、行政、客服、社工等照顧人、需要細心的工作。是團隊裡最讓人安心的存在。",
+      "tips": [
+        "換你為牠煮一碗湯",
+        "說出你看見牠的付出",
+        "主動問牠想要什麼，牠常不好意思開口"
+      ],
+      "mate": "滑板豹貓帶你出門冒險、嘗試新鮮事；你則讓牠知道，有個地方永遠可以回來。"
+    },
+    "ESTJ": {
+      "about": "嗶——集合！你是那隻讓一切井然有序的貓。你務實、直接、很有責任感，看到混亂就想整理，看到問題就想解決。你相信規矩和效率，也說到做到。大家偶爾覺得你很嚴格，但真的出事時，第一個衝出來扛的就是你。",
+      "strengths": [
+        "組織力強，很會分工",
+        "務實，重視結果",
+        "有責任感，值得信賴"
+      ],
+      "blind": [
+        "太堅持自己的做法",
+        "講話直接，容易讓人覺得被指責",
+        "對情緒話題比較沒耐心"
+      ],
+      "love": "你是朋友群的總召，揪團、訂位、分帳都交給你。感情裡穩定可靠，但記得偶爾放下哨子，聽聽對方的心情。",
+      "work": "適合管理、營運、專案、公部門、財務等需要秩序和執行力的工作。天生的組長。",
+      "tips": [
+        "跟牠講具體做法和時間",
+        "準時、守約最加分",
+        "約牠放鬆一下，牠也需要假日"
+      ],
+      "mate": "畫家玳瑁貓教你慢下來，欣賞生活的顏色；你則幫牠把美好的創意變成能落地的計畫。"
+    },
+    "ESFJ": {
+      "about": "你是派對上最忙的那隻貓：招呼大家、補飲料、確認每個人都玩得開心。你熱心、親切、很會顧氣氛，天生就是團體的黏著劑。你在乎和諧，也很重視大家的感受。只要你在，場子就不會冷。",
+      "strengths": [
+        "社交力滿分，很會照顧氣氛",
+        "熱心助人，說幫就幫",
+        "細心，記得每個人的需求"
+      ],
+      "blind": [
+        "太在意別人的評價",
+        "怕衝突，不太敢說真話",
+        "被忽略時會很受傷"
+      ],
+      "love": "朋友超多，你是大家的生日提醒器。感情裡溫暖又貼心，很需要對方的肯定和回應。",
+      "work": "適合活動企劃、業務、服務業、教育、人資等跟人互動的工作。團隊有你就有溫度。",
+      "tips": [
+        "記得回應牠的熱情",
+        "稱讚牠的用心",
+        "有不同意見時，溫柔地說"
+      ],
+      "mate": "機車黑貓的冷靜和自在，提醒你不用每件事都顧到完美；你則讓牠感受到被照顧的溫暖。"
+    },
+    "ISTP": {
+      "about": "話不多，但東西壞了你總能修好。你冷靜、實際，喜歡動手搞懂事物怎麼運作。你需要很多自由，討厭被管、被催。看起來酷酷的，其實只是在觀察；危急時刻，你通常是最沉著、最快找到解法的那一個。",
+      "strengths": [
+        "臨危不亂，危機處理一流",
+        "動手能力強，學技術很快",
+        "務實，不說廢話"
+      ],
+      "blind": [
+        "不太表達情緒，常被說冷淡",
+        "不喜歡長期承諾和規劃",
+        "覺得無聊就想換方向"
+      ],
+      "love": "朋友不多但很鐵，喜歡一起做事勝過一直聊天。感情裡需要空間，用行動代替甜言蜜語，例如默默幫你修好東西。",
+      "work": "適合工程、技術、機械、設計、急救等能動手解決問題的工作。給牠工具和自由就好。",
+      "tips": [
+        "給牠空間，別一直傳訊息",
+        "一起去兜風或做手作",
+        "牠說「沒事」，可能真的沒事"
+      ],
+      "mate": "派對布偶貓的溫暖把你帶進人群；你的冷靜則幫牠在慌亂時穩住陣腳。"
+    },
+    "ISFP": {
+      "about": "你用眼睛和心去感受世界：夕陽的顏色、雨的聲音、一首歌的情緒。溫柔、隨和、活在當下，不喜歡被框住，也不愛跟人比較。你很少高調表達，但你的品味和作品會替你說話。你希望每個人都能自在地做自己。",
+      "strengths": [
+        "美感好，很有藝術天份",
+        "溫柔包容，很好相處",
+        "活在當下，懂得享受生活"
+      ],
+      "blind": [
+        "不喜歡規劃，常常臨時才動",
+        "避免衝突，有話不說",
+        "對批評很敏感"
+      ],
+      "love": "朋友覺得你溫柔又有品味。感情裡用小驚喜和陪伴表達愛，需要被尊重的自由，和不被批判的空間。",
+      "work": "適合設計、攝影、藝術、料理、手作、照護等能發揮美感與感受力的工作。",
+      "tips": [
+        "欣賞牠的作品",
+        "別逼牠馬上做決定",
+        "約牠去看展、散步"
+      ],
+      "mate": "吹哨棕虎斑的行動力幫你把作品推出去；你則讓牠看見規矩之外的生活之美。"
+    },
+    "ESTP": {
+      "about": "想到就做，你是那隻已經從屋頂跳下去的貓。你大膽、反應快、很懂得把握機會，喜歡刺激和挑戰。你讀得懂現場氣氛，說話直接又幽默，很能帶動身邊的人。對你來說，人生就是要邊玩邊學。",
+      "strengths": [
+        "行動力超強，說做就做",
+        "臨場反應快，危機變轉機",
+        "幽默風趣，很會帶氣氛"
+      ],
+      "blind": [
+        "衝太快，忘了想後果",
+        "對長期規劃沒耐心",
+        "容易覺得無聊、坐不住"
+      ],
+      "love": "朋友都覺得跟你出去最好玩。感情裡熱烈直接，需要一起冒險的伴，也要學著停下來聊聊心裡話。",
+      "work": "適合業務、創業、運動、急救、活動等節奏快、需要臨場判斷的工作。久坐辦公室會讓牠抓狂。",
+      "tips": [
+        "約牠出門動一動",
+        "講重點，長篇大論牠聽不下去",
+        "幫牠多想一個 Plan B"
+      ],
+      "mate": "熱湯奶油貓的細心照顧，讓你衝完有地方好好休息；你則帶牠去看外面精彩的世界。"
+    },
+    "ESFP": {
+      "about": "燈光、音樂、掌聲！你一出場，整個空間就亮了。你熱愛生活、喜歡熱鬧，總能讓身邊的人笑出來。你活在當下、懂得享受，也很大方地分享快樂。看起來無憂無慮，其實很在意大家玩得開不開心。",
+      "strengths": [
+        "超有魅力，人緣很好",
+        "樂觀，能把氣氛炒熱",
+        "懂得享受生活，也顧別人感受"
+      ],
+      "blind": [
+        "不愛想太遠，存錢和規劃是弱項",
+        "討厭無聊的工作",
+        "遇到衝突會想逃避"
+      ],
+      "love": "你是聚會的主角，朋友很多。感情裡熱情浪漫、很重視一起創造回憶，需要對方陪你玩，也給你掌聲。",
+      "work": "適合表演、娛樂、餐飲、業務、活動、時尚等需要人氣和臨場魅力的工作。",
+      "tips": [
+        "給牠掌聲，牠會更閃亮",
+        "約牠一起去玩",
+        "溫柔提醒牠：也要照顧未來的自己"
+      ],
+      "mate": "行事曆緬甸貓幫你把快樂的日子過得穩穩的；你則幫牠的行事曆多加幾格「好玩」。"
+    }
+  };
+
+  function moreHtml(code, friend) {
+    const d = D[code], cat = R[code][1], mate = R[code][4];
+    const li = a => a.map(t => `<li>${t}</li>`).join("");
+    return `
+      <section class="more" aria-labelledby="moreTitle">
+        <h2 class="more-title" id="moreTitle"><span>更認識</span>${cat}</h2>
+        <div class="more-grid">
+          <article class="mcard wide"><h3>個性</h3><p>${d.about}</p></article>
+          <article class="mcard"><h3>閃亮強項</h3><ul class="ok">${li(d.strengths)}</ul></article>
+          <article class="mcard"><h3>小小盲點</h3><ul class="warn">${li(d.blind)}</ul></article>
+          <article class="mcard"><h3>朋友與感情</h3><p>${d.love}</p></article>
+          <article class="mcard"><h3>工作與讀書</h3><p>${d.work}</p></article>
+          <article class="mcard wide tint"><h3>跟這隻貓相處</h3><ul class="tips">${li(d.tips)}</ul></article>
+          <article class="mcard wide mate-card"><div class="photo"><img src="img/cats/${mate}.webp" alt="${R[mate][1]}" loading="lazy"></div><div><h3>最佳拍檔</h3><p class="mate-name">${mate}｜${R[mate][1]}</p><p>${d.mate}</p></div></article>
+        </div>
+        <div class="stack more-btns">${friend
+          ? `<button class="btn btn-primary" data-act="try">我也要測</button>`
+          : `<button class="btn btn-primary" data-act="share">分享我的貓</button><button class="btn btn-secondary" data-act="retry">重新測驗</button>`}</div>
+      </section>`;
+  }
   const DIMS = [["E", "I"], ["S", "N"], ["T", "F"], ["J", "P"]];
   const TILT = ["-6deg", "4deg", "-3deg", "5deg"];
 
@@ -522,7 +917,9 @@ a { color: inherit; text-decoration: none; }
           ? `<button class="btn btn-primary" id="tryBtn">我也要測</button>`
           : `<button class="btn btn-primary" id="shareBtn">分享我的貓</button><button class="btn btn-secondary" id="retryBtn">重新測驗</button>`}
       </div>
+      <button class="more-cue" data-beat="2" type="button">往下看，更認識這隻貓<span aria-hidden="true">↓</span></button>
       </div>
+      ${moreHtml(code, friend)}
     `, { scroll: true, cls: "split result" });
     setHash(code.toLowerCase());
     setTimeout(() => sound.reveal(), 60);
@@ -531,6 +928,9 @@ a { color: inherit; text-decoration: none; }
       el.querySelector("#shareBtn").onclick = () => shareMenu(code);
       el.querySelector("#retryBtn").onclick = cover;
     }
+    el.querySelectorAll('[data-act="try"], [data-act="retry"]').forEach(b => b.onclick = cover);
+    el.querySelectorAll('[data-act="share"]').forEach(b => b.onclick = () => shareMenu(code));
+    el.querySelector(".more-cue").onclick = () => el.querySelector(".more").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   // ---------- 分享 ----------
