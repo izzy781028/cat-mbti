@@ -225,6 +225,22 @@ a { color: inherit; text-decoration: none; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
+/* ---------- 配樂開關（固定在右上角） ---------- */
+.music-btn {
+  position: absolute; top: 14px; right: max(14px, env(safe-area-inset-right, 0px)); z-index: 15;
+  width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--cream); color: var(--navy); border: 2px solid var(--navy); box-shadow: 0 3px 0 var(--navy);
+  transition: transform .08s, box-shadow .08s;
+}
+.music-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--navy); }
+.music-btn svg { width: 22px; height: 22px; }
+.music-btn .off { display: none; }
+.music-btn[aria-pressed="false"] .on { display: none; }
+.music-btn[aria-pressed="false"] .off { display: block; }
+.topbar { padding-right: 52px; }
+.screen.result { padding-top: 66px; }
+@container (min-width: 760px) { .screen.result { padding-top: 34px; } }
+
 /* ---------- 電腦版：左右兩欄（畫面寬 760 以上） ---------- */
 .col-a, .col-b { display: contents; }
 @media (min-width: 820px) {
@@ -271,6 +287,10 @@ a { color: inherit; text-decoration: none; }
 
 <div class="app" id="app">
   <div id="stage"></div>
+  <button class="music-btn" id="musicBtn" type="button" aria-pressed="true" aria-label="關閉音樂">
+    <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9h4l5-4v14l-5-4H3z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7"/><path d="M18.8 5.8a9 9 0 0 1 0 12.4"/></svg>
+    <svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9h4l5-4v14l-5-4H3z" fill="currentColor"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg>
+  </button>
   <div class="scrim" id="scrim" hidden></div>
   <div class="sheet" id="sheet" role="dialog" aria-modal="true" hidden></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -669,6 +689,55 @@ a { color: inherit; text-decoration: none; }
   // 預先載入第一屏與分享會用到的圖片
   preload(["img/type/title.webp", "img/cover.webp", "img/paper.webp"]);
   setTimeout(() => preload(["img/type/howto.webp", "img/scenes/01.webp", "img/scenes/02.webp", "img/type/d0.webp", "img/type/d1.webp", "img/type/d2.webp", "img/type/matching.webp"]), 600);
+
+  // ---------- 配樂 ----------
+  (() => {
+    const btn = document.getElementById("musicBtn");
+    const VOL = 0.32;
+    let ctx = null, gain = null, src = null, want = true, started = false;
+    try { want = localStorage.getItem("cat-mbti-music") !== "off"; } catch (e) {}
+    let raw = null;
+    const fetchRaw = () => raw || (raw = fetch("audio/bgm.m4a").then(r => r.arrayBuffer()));
+    setTimeout(fetchRaw, 1200);
+    let decoded = null;
+    function unlock() {
+      if (!ctx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return false;
+        ctx = new AC(); gain = ctx.createGain(); gain.gain.value = 0; gain.connect(ctx.destination);
+      }
+      if (ctx.state === "suspended") ctx.resume();
+      return true;
+    }
+    function ramp(to, sec) {
+      const t = ctx.currentTime;
+      gain.gain.cancelScheduledValues(t); gain.gain.setValueAtTime(gain.gain.value, t); gain.gain.linearRampToValueAtTime(to, t + sec);
+    }
+    async function play() {
+      if (!unlock()) return;
+      started = true;
+      try {
+        if (!decoded) decoded = fetchRaw().then(b => new Promise((res, rej) => ctx.decodeAudioData(b.slice(0), res, rej)));
+        const buffer = await decoded;
+        if (!want) return;
+        if (!src) { src = ctx.createBufferSource(); src.buffer = buffer; src.loop = true; src.connect(gain); src.start(); }
+        ramp(VOL, 1.2);
+      } catch (e) { started = false; }
+    }
+    function stop() { if (ctx && gain) ramp(0, 0.4); }
+    function render() { btn.setAttribute("aria-pressed", String(want)); btn.setAttribute("aria-label", want ? "關閉音樂" : "開啟音樂"); }
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      want = !want;
+      try { localStorage.setItem("cat-mbti-music", want ? "on" : "off"); } catch (er) {}
+      render();
+      if (want) play(); else stop();
+    });
+    // 瀏覽器規定要先有互動才能出聲：第一次點畫面時開始播放
+    document.addEventListener("pointerdown", e => { if (want && !started && e.target !== btn && !btn.contains(e.target)) play(); }, true);
+    document.addEventListener("visibilitychange", () => { if (!ctx) return; if (document.hidden) ctx.suspend(); else if (want) ctx.resume(); });
+    render();
+  })();
 
   const start = () => { const h = (location.hash || "").slice(1).toUpperCase(); if (R[h]) result(h, null, true); else cover(); };
   start();
