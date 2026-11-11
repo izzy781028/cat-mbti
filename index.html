@@ -194,9 +194,12 @@ a { color: inherit; text-decoration: none; }
 .friend-chip { align-self: flex-start; background: var(--cream); border: 1.5px solid var(--navy); border-radius: 999px; padding: 4px 12px; font-weight: 700; font-size: 14px; margin-bottom: 6px; }
 
 /* ---------- 更認識這隻貓 ---------- */
-.more-cue { align-self: center; display: flex; flex-direction: column; align-items: center; margin-top: 18px; font-size: 15px; font-weight: 700; color: var(--slate); }
-.more-cue span { font-size: 20px; line-height: 1; animation: nudge 1.6s ease-in-out infinite; }
-@keyframes nudge { 50% { transform: translateY(5px); } }
+.more-cue { align-self: center; display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 26px; padding: 4px 8px; font-size: 19px; font-weight: 900; color: var(--navy); }
+.more-cue b { font-weight: 900; background: linear-gradient(transparent 60%, var(--mustard) 60%); padding: 0 3px; }
+.more-cue span { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--mustard); border: 2px solid var(--navy); box-shadow: 0 4px 0 var(--navy); animation: nudge 1.3s ease-in-out infinite; }
+.more-cue svg { width: 26px; height: 26px; }
+.more-cue:active span { transform: translateY(3px); box-shadow: 0 1px 0 var(--navy); animation: none; }
+@keyframes nudge { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
 .more { flex: none; display: flex; flex-direction: column; margin-top: 40px; }
 .more-title { margin: 0 0 16px; font-weight: 900; font-size: 30px; line-height: 1.2; }
 .more-title span { display: block; font-size: 18px; color: var(--slate); }
@@ -304,6 +307,7 @@ a { color: inherit; text-decoration: none; }
   .result .res-mid .pre { font-size: 30px; }
   .result .label { margin-top: 0; font-size: 28px; }
   .result .quote { font-size: 28px; }
+  .result .more-cue { font-size: 21px; margin-top: 30px; }
 
   .screen.split.result { grid-template-rows: 0 minmax(calc(100cqh - 74px), auto) auto; }
   .result .more { grid-column: 1 / -1; grid-row: 3; margin-top: 56px; }
@@ -917,7 +921,7 @@ a { color: inherit; text-decoration: none; }
           ? `<button class="btn btn-primary" id="tryBtn">我也要測</button>`
           : `<button class="btn btn-primary" id="shareBtn">分享我的貓</button><button class="btn btn-secondary" id="retryBtn">重新測驗</button>`}
       </div>
-      <button class="more-cue" data-beat="2" type="button">往下看，更認識這隻貓<span aria-hidden="true">↓</span></button>
+      <button class="more-cue" data-beat="2" type="button"><b>往下看，更認識這隻貓</b><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15M5 12l7 7 7-7"/></svg></span></button>
       </div>
       ${moreHtml(code, friend)}
     `, { scroll: true, cls: "split result" });
