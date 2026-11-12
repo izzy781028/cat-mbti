@@ -365,6 +365,55 @@ a { color: inherit; text-decoration: none; }
   .sheet.show { transform: translate(-50%, 0); }
   .preview-img { max-height: 46cqh; }
 }
+
+/* ---------- 動態點綴（減少動態時全部關閉，見最下方） ---------- */
+@keyframes floaty { 0%, 100% { transform: translate(0, 0) rotate(var(--r, 0deg)); } 50% { transform: translate(0, -6px) rotate(calc(var(--r, 0deg) + 1deg)); } }
+.screen.enter .cover-title, .screen.enter .q-num { animation: beatIn .28s var(--ease-out) .06s both, floaty 3.5s ease-in-out .6s infinite; }
+/* 首頁星星 */
+.twinkles { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.twinkles i { position: absolute; left: var(--x); top: var(--y); width: var(--s); height: var(--s); background: var(--cream); clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%); opacity: .2; animation: twinkle var(--d) ease-in-out var(--w) infinite; }
+@keyframes twinkle { 0%, 100% { opacity: .15; transform: scale(.45) rotate(0deg); } 50% { opacity: 1; transform: scale(1) rotate(25deg); } }
+@container (min-width: 760px) { .twinkles i { left: var(--x2); top: var(--y2); } }
+/* 合照卡片傾斜（電腦版） */
+.cover-card { perspective: 900px; }
+.cover-card .photo { transition: transform .3s var(--ease-out); }
+.cover-card .sticker { transition: translate .3s var(--ease-out); }
+/* 按鈕掃光 */
+.shine { position: relative; overflow: hidden; }
+.shine::after { content: ""; position: absolute; top: -10%; bottom: -10%; left: 0; width: 34%; background: linear-gradient(100deg, transparent, rgba(255, 244, 224, .6), transparent); transform: translateX(-160%) skewX(-18deg); animation: shine 3.6s ease-in-out 1.2s infinite; pointer-events: none; }
+@keyframes shine { 0% { transform: translateX(-160%) skewX(-18deg); } 30%, 100% { transform: translateX(380%) skewX(-18deg); } }
+/* 進度條小貓 */
+.track { overflow: visible; }
+.fill { position: relative; }
+.runner { position: absolute; right: -14px; top: 50%; width: 30px; height: 30px; margin-top: -15px; border-radius: 50%; border: 2px solid var(--navy); background: var(--page) url("img/heads.webp") 0 calc(var(--hi) / 15 * 100%) / 100% 1600% no-repeat; box-shadow: 0 2px 0 var(--navy); }
+.screen.enter .runner { animation: hop .5s var(--ease-out) .12s; }
+@keyframes hop { 0%, 100% { transform: translateY(0) rotate(0); } 40% { transform: translateY(-8px) rotate(-10deg); } }
+.topbar .count { margin-left: 8px; }
+/* 點選爪印 */
+.scale .dw { position: relative; }
+.scale button.pop .dot { animation: popIn .32s var(--ease-back); }
+@keyframes popIn { 0% { transform: scale(.82); } 60% { transform: scale(1.14); } 100% { transform: scale(1); } }
+.paw { position: absolute; left: 50%; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; pointer-events: none; animation: paw .6s var(--ease-out) forwards; }
+.paw svg { display: block; width: 100%; height: 100%; fill: currentColor; }
+@keyframes paw { 0% { transform: translate(0, 0) scale(.3) rotate(0deg); opacity: 1; } 65% { opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--rot)); opacity: 0; } }
+/* 計算中拉霸 */
+.slot { width: 150px; height: 150px; padding: 8px; background: var(--mustard); border: 3px solid var(--navy); border-radius: 28px; box-shadow: 0 5px 0 var(--navy); }
+.reel { position: relative; width: 100%; height: 100%; border-radius: 18px; border: 2px solid var(--navy); background: var(--page) url("img/heads.webp") 0 0 / 100% 1600% repeat-y; overflow: hidden; }
+.reel::after { content: ""; position: absolute; inset: 0; background: linear-gradient(rgba(31, 42, 68, .28), transparent 26%, transparent 74%, rgba(31, 42, 68, .28)); }
+.slot.hit { animation: popIn .36s var(--ease-back); }
+/* 結果字母蓋章 */
+.res-letters img { transform: rotate(var(--t, 0deg)); }
+.screen.enter .res-letters.stamp img { animation: stamp .34s cubic-bezier(.3, 1.5, .5, 1) calc(.08s + var(--i) * .11s) both; }
+@keyframes stamp { 0% { opacity: 0; transform: scale(1.9) rotate(calc(var(--t, 0deg) - 12deg)); } 55% { opacity: 1; } 100% { opacity: 1; transform: scale(1) rotate(var(--t, 0deg)); } }
+/* 彩紙 */
+.confetti { position: absolute; inset: 0; pointer-events: none; z-index: 14; overflow: hidden; }
+.confetti i { position: absolute; }
+@media (prefers-reduced-motion: reduce) {
+  .screen.enter .cover-title, .screen.enter .q-num, .screen.enter .res-letters.stamp img, .screen.enter .runner { animation: none !important; }
+  .twinkles i { animation: none; opacity: .7; }
+  .shine::after { display: none; }
+  .scale button.pop .dot, .slot.hit { animation: none; }
+}
 </style>
 </head>
 <body>
@@ -807,6 +856,60 @@ a { color: inherit; text-decoration: none; }
   let current = null;
   let busy = false;
 
+  // ---------- 動態點綴 ----------
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const PAW = '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="16.5" rx="5.6" ry="4.6"/><circle cx="5.2" cy="10.2" r="2.4"/><circle cx="9.4" cy="5.8" r="2.4"/><circle cx="14.6" cy="5.8" r="2.4"/><circle cx="18.8" cy="10.2" r="2.4"/></svg>';
+  function tiltCard(el) {
+    if (reduceMotion || !matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    const card = el.querySelector(".cover-card"), photo = card.querySelector(".photo"), sticker = card.querySelector(".sticker");
+    const clamp = v => Math.max(-1, Math.min(1, v));
+    el.addEventListener("pointermove", e => {
+      const r = card.getBoundingClientRect();
+      const x = clamp((e.clientX - r.left - r.width / 2) / r.width), y = clamp((e.clientY - r.top - r.height / 2) / r.height);
+      photo.style.transform = `rotateY(${x * 9}deg) rotateX(${-y * 9}deg)`;
+      sticker.style.translate = `${-x * 8}px ${-y * 8}px`;
+    });
+    el.addEventListener("pointerleave", () => { photo.style.transform = ""; sticker.style.translate = ""; });
+  }
+  function pawBurst(btn) {
+    btn.classList.add("pop");
+    if (reduceMotion) return;
+    const host = btn.querySelector(".dw"), color = btn.classList.contains("r") ? "var(--orange)" : "var(--teal)";
+    for (let k = 0; k < 6; k++) {
+      const p = document.createElement("i");
+      const ang = (-90 + (k - 2.5) * 34 + (Math.random() * 16 - 8)) * Math.PI / 180, dist = 34 + Math.random() * 18;
+      p.className = "paw"; p.innerHTML = PAW; p.style.color = color;
+      p.style.setProperty("--tx", `${Math.cos(ang) * dist}px`);
+      p.style.setProperty("--ty", `${Math.sin(ang) * dist}px`);
+      p.style.setProperty("--rot", `${Math.random() * 80 - 40}deg`);
+      host.appendChild(p);
+      setTimeout(() => p.remove(), 700);
+    }
+  }
+  function confetti(from) {
+    if (reduceMotion || !from) return;
+    const app = document.getElementById("app"), ar = app.getBoundingClientRect(), r = from.getBoundingClientRect();
+    const ox = r.left + r.width / 2 - ar.left, oy = r.top + r.height * 0.35 - ar.top;
+    const layer = document.createElement("div");
+    layer.className = "confetti";
+    app.appendChild(layer);
+    const colors = ["#F2C230", "#3FA7A3", "#F27B35", "#FFF4E0", "#1F2A44"];
+    for (let k = 0; k < 56; k++) {
+      const p = document.createElement("i");
+      const w = 8 + Math.random() * 7, h = Math.random() < 0.3 ? w : w * 1.7;
+      p.style.cssText = `left:${ox}px;top:${oy}px;width:${w}px;height:${h}px;background:${colors[k % colors.length]};border-radius:${Math.random() < 0.3 ? "50%" : "2px"}`;
+      layer.appendChild(p);
+      const ang = (-90 + (Math.random() * 2 - 1) * 72) * Math.PI / 180, sp = 180 + Math.random() * 210;
+      const dx = Math.cos(ang) * sp, dy = Math.sin(ang) * sp, fall = 240 + Math.random() * 240, rot = (Math.random() * 2 - 1) * 720;
+      p.animate([
+        { transform: "translate(-50%, -50%) rotate(0deg)", opacity: 1 },
+        { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) rotate(${rot / 2}deg)`, opacity: 1, offset: 0.35 },
+        { transform: `translate(calc(-50% + ${dx * 1.25}px), calc(-50% + ${dy + fall}px)) rotate(${rot}deg)`, opacity: 0 },
+      ], { duration: 1200 + Math.random() * 500, easing: "cubic-bezier(.2, .7, .3, 1)", fill: "forwards" });
+    }
+    setTimeout(() => layer.remove(), 1900);
+  }
+
   // ---------- 出題與計分 ----------
   const shuffle = a => { for (let k = a.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [a[k], a[j]] = [a[j], a[k]]; } return a; };
   const qDim = id => (id < 20 ? Math.floor(id / 5) : QX[id - 20][0]);
@@ -821,7 +924,8 @@ a { color: inherit; text-decoration: none; }
     }
     const flip = {};
     for (let id = 0; id < 20 + QX.length; id++) flip[id] = Math.random() < 0.5;
-    quiz = { seq, flip, ans: {} };
+    quiz = { seq, flip, ans: {}, runner: Math.floor(Math.random() * 16) };
+    preload(["img/heads.webp"]);
   }
   function tally(ids) {
     const sum = [0, 0, 0, 0], n = [0, 0, 0, 0];
@@ -875,6 +979,14 @@ a { color: inherit; text-decoration: none; }
     closeSheet(true);
     quiz = null;
     show(`
+      <div class="twinkles" aria-hidden="true">
+        <i style="--x:70%;--y:13%;--x2:44%;--y2:9%;--s:18px;--d:2.6s;--w:0s"></i>
+        <i style="--x:88%;--y:25%;--x2:51%;--y2:44%;--s:13px;--d:3.1s;--w:.7s"></i>
+        <i style="--x:64%;--y:33%;--x2:47%;--y2:82%;--s:15px;--d:2.8s;--w:1.4s"></i>
+        <i style="--x:5%;--y:57%;--x2:95%;--y2:24%;--s:20px;--d:3.4s;--w:.3s"></i>
+        <i style="--x:14%;--y:68%;--x2:94%;--y2:68%;--s:12px;--d:2.5s;--w:1.1s"></i>
+        <i style="--x:6%;--y:80%;--x2:37%;--y2:7%;--s:16px;--d:3s;--w:1.8s"></i>
+      </div>
       <span class="chip" data-beat="1" style="--r:-4deg;--dx:-24px;--dy:0">MBTI<span class="x">×</span>CATS</span>
       <div class="cover-art">
         <img class="cover-title" src="img/type/title.webp" alt="你是哪一種貓？" data-beat="1" style="--dy:-30px">
@@ -883,8 +995,8 @@ a { color: inherit; text-decoration: none; }
           <div class="sticker" aria-hidden="true">20 題<br>5 分鐘</div>
         </div>
       </div>
-      <button class="btn btn-primary" id="startBtn" data-beat="2" data-autofocus>開始測驗</button>
-    `, { cls: "cover", bind: el => el.querySelector("#startBtn").onclick = intro });
+      <button class="btn btn-primary shine" id="startBtn" data-beat="2" data-autofocus>開始測驗</button>
+    `, { cls: "cover", bind: el => { el.querySelector("#startBtn").onclick = intro; tiltCard(el); } });
     setHash("");
   }
 
@@ -930,7 +1042,7 @@ a { color: inherit; text-decoration: none; }
     const el = show(`
       <div class="topbar">
         <button class="back" id="backBtn" aria-label="上一題">‹</button>
-        <div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="20" aria-valuenow="${Math.min(pos + 1, 20)}"><div class="fill" id="fill"></div></div>
+        <div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="20" aria-valuenow="${Math.min(pos + 1, 20)}"><div class="fill" id="fill"><i class="runner" style="--hi:${quiz.runner}" aria-hidden="true"></i></div></div>
         <span class="count">${extra ? `加賽 ${xNo} / ${xTotal}` : `${pos + 1} / 20`}</span>
         <button class="home" id="homeBtn">回首頁</button>
       </div>
@@ -962,9 +1074,10 @@ a { color: inherit; text-decoration: none; }
       busy = true;
       el.querySelectorAll(".scale button").forEach(o => o.classList.remove("picked"));
       btn.classList.add("picked");
+      pawBurst(btn);
       const v = +btn.dataset.v;
       quiz.ans[id] = flip ? -v : v;
-      setTimeout(() => next(pos), 200);
+      setTimeout(() => next(pos), reduceMotion ? 200 : 320);
     });
   }
 
@@ -985,16 +1098,22 @@ a { color: inherit; text-decoration: none; }
 
   // ---------- 計算中 ----------
   function loading() {
-    show(`
+    const el = show(`
       <div class="loading screen" style="position:static;padding:0;flex:1">
         <img src="img/type/matching.webp" alt="配對中…" data-beat="1">
-        <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="slot" data-beat="1" aria-hidden="true"><div class="reel"></div></div>
         <p data-beat="2">正在翻 16 隻貓的履歷</p>
       </div>
     `);
     const { code, lean } = verdict();
     preload([`img/cats/${code}.webp`, ...code.split("").map(L => `img/type/${L}.webp`)]);
-    setTimeout(() => result(code, lean, false), 1500);
+    const idx = Object.keys(R).indexOf(code), slot = el.querySelector(".slot"), reel = el.querySelector(".reel");
+    const H = reel.clientHeight;
+    reel.style.backgroundSize = `100% ${H * 16}px`;
+    if (reduceMotion) reel.style.backgroundPositionY = `${-idx * H}px`;
+    else reel.animate([{ backgroundPositionY: "0px" }, { backgroundPositionY: `${-(32 + idx) * H}px` }], { duration: 1400, easing: "cubic-bezier(.12, .6, .18, 1)", fill: "forwards" });
+    setTimeout(() => slot.classList.add("hit"), reduceMotion ? 0 : 1400);
+    setTimeout(() => result(code, lean, false), reduceMotion ? 1200 : 1950);
   }
 
   // ---------- 結果 ----------
@@ -1007,8 +1126,8 @@ a { color: inherit; text-decoration: none; }
     const el = show(`
       <div class="col-a">
       ${friend ? `<span class="friend-chip" data-beat="1">朋友的本命貓</span>` : ""}
-      <div class="res-letters" data-beat="1" style="--dy:-50px" role="img" aria-label="${code}">
-        ${code.split("").map((L, k) => `<img src="img/type/${L}.webp" alt="" style="transform:rotate(${TILT[k]})">`).join("")}
+      <div class="res-letters stamp" role="img" aria-label="${code}">
+        ${code.split("").map((L, k) => `<img src="img/type/${L}.webp" alt="" style="--t:${TILT[k]};--i:${k}">`).join("")}
       </div>
       <div class="res-mid">
         <div class="pre" data-beat="1" style="--dx:-30px;--dy:0">${friend ? "朋友的<br>本命貓<br>是" : "你的<br>本命貓<br>是"}</div>
@@ -1034,6 +1153,7 @@ a { color: inherit; text-decoration: none; }
     `, { scroll: true, cls: "split result" });
     setHash(code.toLowerCase());
     setTimeout(() => sound.reveal(), 60);
+    if (!friend) setTimeout(() => confetti(el.querySelector(".res-card")), 320);
     if (friend) el.querySelector("#tryBtn").onclick = cover;
     else {
       el.querySelector("#shareBtn").onclick = () => shareMenu(code);
