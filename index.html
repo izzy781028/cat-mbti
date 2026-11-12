@@ -163,6 +163,37 @@ a { color: inherit; text-decoration: none; }
 .option.picked { background: var(--orange); color: var(--cream); }
 .option.picked .letter { background: var(--cream); color: var(--navy); }
 
+/* ---------- 四級作答 ---------- */
+.pick { display: flex; flex-direction: column; gap: 14px; }
+.stmts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stmt { margin: 0; background: var(--cream); border: 2px solid var(--navy); border-radius: 18px; padding: 10px 12px 12px; font-weight: 700; font-size: 17px; line-height: 1.4; text-wrap: pretty; }
+.stmt .side { display: block; width: fit-content; margin-bottom: 6px; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 900; color: var(--cream); background: var(--teal); }
+.stmt.r .side { background: var(--orange); }
+.scale { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); }
+.scale::before { content: ""; position: absolute; left: 12.5%; right: 12.5%; top: 27px; height: 3px; border-radius: 2px; background: rgba(31, 42, 68, .22); }
+.scale button { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; line-height: 1.2; color: var(--slate); }
+.scale .dw { height: 56px; display: grid; place-items: center; }
+.scale .dot { --c: var(--teal); width: 42px; height: 42px; border-radius: 50%; border: 3px solid var(--c); background: var(--cream); color: var(--cream); display: grid; place-items: center; transition: transform .08s, background .15s; }
+.scale .r .dot { --c: var(--orange); }
+.scale .big .dot { width: 56px; height: 56px; }
+.scale .dot svg { width: 60%; height: 60%; opacity: 0; }
+.scale button:active .dot { transform: scale(.92); }
+.scale button.picked .dot { background: var(--c); }
+.scale button.picked .dot svg { opacity: 1; }
+.scale button.picked .lbl { color: var(--navy); }
+@media (hover: hover) { .scale button:hover .dot { background: color-mix(in srgb, var(--c) 22%, var(--cream)); } .scale button.picked:hover .dot { background: var(--c); } }
+.scene .photo img.flip { transform: scaleX(-1); }
+.question .scene { width: min(100%, 26cqh * 1.5); }
+.question .q-num { height: clamp(64px, 11cqh, 124px); }
+.question .q-text { margin-top: 14px; }
+/* 加賽題 */
+.xtra { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; margin-top: 6px; }
+.xtra .label { align-self: center; margin: 0; transform: rotate(-3deg); }
+.vs { display: flex; align-items: center; gap: 4px; height: clamp(96px, 17cqh, 200px); }
+.vs img { height: 100%; width: auto; }
+.vs span { font-weight: 900; font-size: 26px; margin: 0 6px; }
+.vs-note { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.5; max-width: 22em; text-wrap: balance; }
+
 /* ---------- 計算中 ---------- */
 .loading { justify-content: center; align-items: center; gap: 22px; text-align: center; }
 .loading img { width: 86%; }
@@ -299,6 +330,16 @@ a { color: inherit; text-decoration: none; }
   /* 題目 */
   .question .q-num { height: clamp(96px, 16cqh, 160px); }
   .question .scene { width: 100%; margin-top: 18px; }
+
+  .question .scene { width: 100%; }
+  .stmt { font-size: 20px; padding: 14px 16px 16px; }
+  .scale .dw { height: 64px; }
+  .scale::before { top: 31px; }
+  .scale .dot { width: 48px; height: 48px; }
+  .scale .big .dot { width: 64px; height: 64px; }
+  .scale button { font-size: 15px; }
+  .vs { height: clamp(140px, 24cqh, 240px); }
+  .vs-note { font-size: 20px; }
   .question .q-text { font-size: clamp(28px, 4.4cqh, 40px); margin: 0 0 32px; }
   .question .spacer { display: none; }
   /* 結果 */
@@ -365,6 +406,17 @@ a { color: inherit; text-decoration: none; }
     ["截止日前一週，你…", "已經做完一半了", "截止前一晚爆發小宇宙"],
     ["去餐廳點餐", "早就看好菜單決定了", "到現場看感覺再點"],
     ["突然被約今晚出去玩", "有點煩，打亂我的計畫", "好啊！臨時的最好玩"],
+  ];
+  // 加賽題：主 20 題某個維度太接近（總分 -2～+2）時才出，每個維度 2 題；第二欄是該維度第一個字母那一邊
+  const QX = [
+    [0, "朋友約吃晚餐，還帶了你不認識的人", "好啊，正好多認識新朋友", "嗯…其實有點想改天再約"],
+    [0, "有好消息的時候，你的第一個反應", "馬上傳給一堆人分享", "自己先開心一下，晚點再說"],
+    [1, "組一座新的貓跳台", "照說明書一步一步來", "看一眼圖，憑感覺開始組"],
+    [1, "跟朋友聊天時，你比較常講", "今天發生的具體小事", "突然想到的點子和「如果…」"],
+    [2, "朋友問你：「我是不是做錯了？」", "客觀說哪裡錯、怎麼補救", "先安慰他，再陪他想辦法"],
+    [2, "挑禮物的時候，你最在意", "實不實用，對方用不用得到", "對方收到時會不會感動"],
+    [3, "放假的第一天", "早就排好要做什麼", "睡醒再決定"],
+    [3, "帶著購物清單去超市", "照清單買，買完就走", "逛到什麼買什麼，清單參考用"],
   ];
   const R = {
     INTJ: ["建築師", "西洋棋藍貓", "三步之後的事，我早就想好了。", ["策略", "獨立", "冷靜"], "ENFP"],
@@ -751,15 +803,52 @@ a { color: inherit; text-decoration: none; }
   const sheet = document.getElementById("sheet");
   const scrim = document.getElementById("scrim");
   const toast = document.getElementById("toast");
-  let answers = new Array(20).fill(null);
+  let quiz = null; // { seq: 題目順序（id）, flip: 左右是否對調, ans: id → +2/+1/-1/-2（正數偏向該維度第一個字母） }
   let current = null;
   let busy = false;
 
-  // ---------- 計分 ----------
-  function score(ans) {
-    const counts = [0, 1, 2, 3].map(d => ans.slice(d * 5, d * 5 + 5).filter(a => a === "A").length);
-    const code = counts.map((c, d) => (c >= 3 ? DIMS[d][0] : DIMS[d][1])).join("");
-    return { code, counts };
+  // ---------- 出題與計分 ----------
+  const shuffle = a => { for (let k = a.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [a[k], a[j]] = [a[j], a[k]]; } return a; };
+  const qDim = id => (id < 20 ? Math.floor(id / 5) : QX[id - 20][0]);
+  const qText = id => (id < 20 ? Q[id] : QX[id - 20].slice(1));
+  // 四個維度交錯出題，同一維度不會連著出現；每題左右隨機
+  function newQuiz() {
+    const seq = [];
+    for (let k = 0; k < 5; k++) {
+      const dims = shuffle([0, 1, 2, 3]);
+      if (seq.length && qDim(seq[seq.length - 1]) === dims[0]) dims.push(dims.shift());
+      dims.forEach(d => seq.push(d * 5 + k));
+    }
+    const flip = {};
+    for (let id = 0; id < 20 + QX.length; id++) flip[id] = Math.random() < 0.5;
+    quiz = { seq, flip, ans: {} };
+  }
+  function tally(ids) {
+    const sum = [0, 0, 0, 0], n = [0, 0, 0, 0];
+    ids.forEach(id => { const v = quiz.ans[id]; if (v != null) { const d = qDim(id); sum[d] += v; n[d]++; } });
+    return { sum, n };
+  }
+  function verdict() {
+    const { sum, n } = tally(quiz.seq);
+    const code = sum.map((s, d) => {
+      if (s !== 0) return s > 0 ? DIMS[d][0] : DIMS[d][1];
+      const last = [...quiz.seq].reverse().find(id => qDim(id) === d && quiz.ans[id] != null);
+      return quiz.ans[last] > 0 ? DIMS[d][0] : DIMS[d][1];
+    }).join("");
+    const lean = sum.map((s, d) => Math.round(50 + 50 * Math.abs(s) / (2 * Math.max(n[d], 1))));
+    return { code, lean };
+  }
+  // 答完主 20 題後，太接近的維度加賽 2 題（交錯出題）
+  function next(pos) {
+    if (pos === 19) {
+      const main = quiz.seq.slice(0, 20);
+      const { sum } = tally(main);
+      const close = [0, 1, 2, 3].filter(d => Math.abs(sum[d]) <= 2);
+      const extras = [];
+      [0, 1].forEach(r => close.forEach(d => extras.push(20 + QX.findIndex(x => x[0] === d) + r)));
+      quiz.seq = main.concat(extras);
+    }
+    if (pos + 1 < quiz.seq.length) question(pos + 1); else loading();
   }
 
   // ---------- 畫面切換 ----------
@@ -784,7 +873,7 @@ a { color: inherit; text-decoration: none; }
   // ---------- 首頁 ----------
   function cover() {
     closeSheet(true);
-    answers = new Array(20).fill(null);
+    quiz = null;
     show(`
       <span class="chip" data-beat="1" style="--r:-4deg;--dx:-24px;--dy:0">MBTI<span class="x">×</span>CATS</span>
       <div class="cover-art">
@@ -804,60 +893,78 @@ a { color: inherit; text-decoration: none; }
       <div class="col-a"><img class="howto-title" src="img/type/howto.webp" alt="怎麼玩？" data-beat="1" style="--dx:-30px;--dy:0"></div>
       <div class="col-b">
       <div class="steps">
-        <div class="step" data-beat="1" style="--r:-2deg;--dx:80px;--dy:0"><b>1</b>20 題情境題，每題二選一</div>
+        <div class="step" data-beat="1" style="--r:-2deg;--dx:80px;--dy:0"><b>1</b>20 題情境題，選出你比較像哪一邊</div>
         <div class="step" data-beat="1" style="--r:2deg;--dx:110px;--dy:0"><b>2</b>憑直覺選，不要想太久</div>
         <div class="step" data-beat="1" style="--r:-1deg;--dx:140px;--dy:0"><b>3</b>看結果，分享你的本命貓</div>
       </div>
       <button class="btn btn-primary" id="readyBtn" data-beat="2" data-autofocus>我準備好了</button>
       </div>
-    `, { cls: "split", bind: el => el.querySelector("#readyBtn").onclick = () => question(0) });
+    `, { cls: "split", bind: el => el.querySelector("#readyBtn").onclick = () => { if (!quiz) newQuiz(); question(0); } });
   }
 
   // ---------- 題目 ----------
-  function question(i) {
+  const SCALE = [[2, "超像左邊", "l"], [1, "有點像左邊", "l"], [-1, "有點像右邊", "r"], [-2, "超像右邊", "r"]];
+  function question(pos) {
     busy = false;
-    const [q, a, b] = Q[i];
-    const rhythm = (i % 3) + 1;
+    const id = quiz.seq[pos], extra = id >= 20, d = qDim(id);
+    const [q, a, b] = qText(id);
+    const flip = quiz.flip[id];
+    const [left, right] = flip ? [b, a] : [a, b];
+    const val = quiz.ans[id];
+    const picked = val == null ? null : (flip ? -val : val);
+    const rhythm = (pos % 3) + 1;
     const tilt = rhythm === 2 ? 3 : -3;
     const tapeX = { 1: 50, 2: 28, 3: 72 }[rhythm];
-    const pick = answers[i];
+    const xTotal = quiz.seq.length - 20, xNo = pos - 19;
+    const head = extra ? `
+      <div class="xtra" data-beat="1" style="--dx:60px;--dy:0">
+        <span class="label">加賽題</span>
+        <div class="vs" aria-hidden="true"><img src="img/type/${DIMS[d][0]}.webp" alt="" style="transform:rotate(-6deg)"><span>vs</span><img src="img/type/${DIMS[d][1]}.webp" alt="" style="transform:rotate(5deg)"></div>
+        <p class="vs-note">${DIMS[d][0]} 跟 ${DIMS[d][1]} 你兩邊都有一點，加賽兩題分出高下！</p>
+      </div>` : `
+      <div class="q-num r${rhythm}" data-beat="1" style="--dx:60px;--dy:0" aria-hidden="true">${String(pos + 1).padStart(2, "0").split("").map((dg, k) => `<img src="img/type/d${dg}.webp" alt="" style="transform:rotate(${k ? 5 : -6}deg)">`).join("")}</div>
+      <div class="scene" data-beat="1" style="--r:${tilt}deg;--dr:${tilt * 2}deg;--dy:40px">
+        <div class="photo"><img src="img/scenes/${String(id + 1).padStart(2, "0")}.webp" alt="情境插圖：左半邊是左邊選項的貓，右半邊是右邊選項的貓"${flip ? ' class="flip"' : ""}></div>
+        <i class="tape" style="left:${tapeX}%;--tr:${rhythm === 2 ? -7 : 6}deg"></i>
+      </div>`;
     const el = show(`
       <div class="topbar">
-        <button class="back" id="backBtn" aria-label="上一題" ${i === 0 ? "" : ""}>‹</button>
-        <div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="20" aria-valuenow="${i + 1}"><div class="fill" id="fill"></div></div>
-        <span class="count">${i + 1} / 20</span>
+        <button class="back" id="backBtn" aria-label="上一題">‹</button>
+        <div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="20" aria-valuenow="${Math.min(pos + 1, 20)}"><div class="fill" id="fill"></div></div>
+        <span class="count">${extra ? `加賽 ${xNo} / ${xTotal}` : `${pos + 1} / 20`}</span>
         <button class="home" id="homeBtn">回首頁</button>
       </div>
-      <div class="col-a">
-      <div class="q-num r${rhythm}" data-beat="1" style="--dx:60px;--dy:0" aria-hidden="true">${String(i + 1).padStart(2, "0").split("").map((d, k) => `<img src="img/type/d${d}.webp" alt="" style="transform:rotate(${k ? 5 : -6}deg)">`).join("")}</div>
-      <div class="scene" data-beat="1" style="--r:${tilt}deg;--dr:${tilt * 2}deg;--dy:40px">
-        <div class="photo"><img src="img/scenes/${String(i + 1).padStart(2, "0")}.webp" alt="情境插圖：左邊是 A 選項的貓，右邊是 B 選項的貓"></div>
-        <i class="tape" style="left:${tapeX}%;--tr:${rhythm === 2 ? -7 : 6}deg"></i>
-      </div>
+      <div class="col-a">${head}
       </div>
       <div class="col-b">
       <h2 class="q-text" data-beat="1">${q}</h2>
       <div class="spacer"></div>
-      <div class="stack" data-beat="2" style="--dy:60px">
-        <button class="option ${pick === "A" ? "picked" : ""}" data-ans="A"><span class="letter">A</span><span>${a}</span></button>
-        <button class="option ${pick === "B" ? "picked" : ""}" data-ans="B"><span class="letter">B</span><span>${b}</span></button>
+      <div class="pick" data-beat="2" style="--dy:60px">
+        <div class="stmts">
+          <p class="stmt l"><span class="side">左邊</span>${left}</p>
+          <p class="stmt r"><span class="side">右邊</span>${right}</p>
+        </div>
+        <div class="scale" role="group" aria-label="你比較像哪一邊？">
+          ${SCALE.map(([v, t, s]) => `<button class="${s}${Math.abs(v) === 2 ? " big" : ""}${picked === v ? " picked" : ""}" data-v="${v}" aria-label="${t}：${v > 0 ? left : right}"><span class="dw"><span class="dot"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span><span class="lbl">${t}</span></button>`).join("")}
+        </div>
       </div>
       </div>
-    `, { cls: "split question" });
+    `, { cls: "split question" + (extra ? " extra" : "") });
     const fill = el.querySelector("#fill");
-    const prev = Math.max(i, 1) / 20 * 100;
-    fill.style.width = (i === 0 ? 0 : (i / 20) * 100) + "%";
-    requestAnimationFrame(() => requestAnimationFrame(() => { fill.style.width = ((i + 1) / 20) * 100 + "%"; }));
-    preload([i + 2, i + 3].filter(n => n <= 20).flatMap(n => [`img/scenes/${String(n).padStart(2, "0")}.webp`, ...String(n).padStart(2, "0").split("").map(d => `img/type/d${d}.webp`)]));
-    el.querySelector("#backBtn").onclick = () => (i === 0 ? intro() : question(i - 1));
+    fill.style.width = (extra ? 100 : (pos / 20) * 100) + "%";
+    if (!extra) requestAnimationFrame(() => requestAnimationFrame(() => { fill.style.width = ((pos + 1) / 20) * 100 + "%"; }));
+    preload(quiz.seq.slice(pos + 1, pos + 3).filter(n => n < 20).flatMap(n => [`img/scenes/${String(n + 1).padStart(2, "0")}.webp`]).concat([pos + 2, pos + 3].filter(n => n <= 20).flatMap(n => String(n).padStart(2, "0").split("").map(dg => `img/type/d${dg}.webp`))));
+    if (pos === 18 || pos === 19) preload(DIMS.flat().map(L => `img/type/${L}.webp`));
+    el.querySelector("#backBtn").onclick = () => (pos === 0 ? intro() : question(pos - 1));
     el.querySelector("#homeBtn").onclick = confirmHome;
-    el.querySelectorAll(".option").forEach(btn => btn.onclick = () => {
+    el.querySelectorAll(".scale button").forEach(btn => btn.onclick = () => {
       if (busy) return;
       busy = true;
-      el.querySelectorAll(".option").forEach(o => o.classList.remove("picked"));
+      el.querySelectorAll(".scale button").forEach(o => o.classList.remove("picked"));
       btn.classList.add("picked");
-      answers[i] = btn.dataset.ans;
-      setTimeout(() => (i < 19 ? question(i + 1) : loading()), 170);
+      const v = +btn.dataset.v;
+      quiz.ans[id] = flip ? -v : v;
+      setTimeout(() => next(pos), 200);
     });
   }
 
@@ -885,17 +992,17 @@ a { color: inherit; text-decoration: none; }
         <p data-beat="2">正在翻 16 隻貓的履歷</p>
       </div>
     `);
-    const { code, counts } = score(answers);
+    const { code, lean } = verdict();
     preload([`img/cats/${code}.webp`, ...code.split("").map(L => `img/type/${L}.webp`)]);
-    setTimeout(() => result(code, counts, false), 1500);
+    setTimeout(() => result(code, lean, false), 1500);
   }
 
   // ---------- 結果 ----------
-  function result(code, counts, friend) {
+  function result(code, lean, friend) {
     const [role, cat, line, kws, mate] = R[code];
-    const bars = counts ? DIMS.map(([L, Rr], d) => {
-      const left = counts[d], right = 5 - left, winL = left >= 3;
-      return `<div class="bar"><span class="${winL ? "on" : "off"}">${L}</span><span class="b"><i style="${winL ? `left:0;width:${left * 20}%` : `right:0;width:${right * 20}%`}"></i></span><span class="${winL ? "off" : "on"}">${Rr}</span></div>`;
+    const bars = lean ? DIMS.map(([L, Rr], d) => {
+      const winL = code[d] === L, w = lean[d];
+      return `<div class="bar"><span class="${winL ? "on" : "off"}">${L}</span><span class="b"><i style="${winL ? `left:0;width:${w}%` : `right:0;width:${w}%`}"></i></span><span class="${winL ? "off" : "on"}">${Rr}</span></div>`;
     }).join("") : "";
     const el = show(`
       <div class="col-a">
@@ -914,7 +1021,7 @@ a { color: inherit; text-decoration: none; }
       <div class="label" data-beat="2" style="--r:2deg;--dx:-140px;--dy:0">${role}｜${cat}</div>
       <p class="quote" data-beat="2">「${line}」</p>
       <div class="kws" data-beat="2">${kws.map(k => `<span>${k}</span>`).join("")}</div>
-      ${bars ? `<div class="bars" data-beat="2" aria-label="四個維度的傾向，每個維度 5 題">${bars}</div>` : ""}
+      ${bars ? `<div class="bars" data-beat="2" aria-label="四個維度的傾向">${bars}</div>` : ""}
       <p class="mate" data-beat="2">最佳拍檔：${mate} ${R[mate][1]}</p>
       <div class="stack res-btns" data-beat="2" style="--dy:50px">
         ${friend
